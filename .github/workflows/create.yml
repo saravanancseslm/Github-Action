@@ -1,0 +1,40 @@
+name: 'Terraform-Github-apply'
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+         aws-region: us-east-1
+         role-to-assume: arn:aws:iam::307946664607:role/terraform-github-action-role
+
+    - run: aws sts get-caller-identity 
+     
+    - name: Terraform Init
+      run: terraform init 
+   
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: terraform plan
+      run: terraform plan 
+       
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/xxxx' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=true
