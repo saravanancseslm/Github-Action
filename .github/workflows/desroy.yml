@@ -1,0 +1,29 @@
+name: Terraform-Github-Destroy
+on:
+ workflow_dispatch:
+
+jobs:
+ tf-destroy:
+   runs-on: ubuntu-latest
+   permissions:
+      id-token: write
+      contents: read
+   steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+           aws-region: us-east-2
+           role-to-assume: arn:aws:iam::307946664607:role/terraform-github-action-role
+      - run: aws sts get-caller-identity   
+
+      - name: Terraform Init
+        run: terraform init 
+        
+      - name: Show Destroy plan
+        run: terraform plan -destroy
+    
+      - name: Terraform destroy
+        run: terraform destroy -auto-approve
